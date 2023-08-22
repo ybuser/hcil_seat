@@ -124,9 +124,33 @@ const Modal = styled.div`
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  background-color: #fff;
-  padding: 20px;
+  background-color: #f2e8df; // A neutral, light beige that complements your current colors
+  padding: 0 20px 20px 20px;
   border: 1px solid #ccc;
+  border-radius: 10px;
+  width: 250px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); // Adding a slight shadow for depth
+`;
+
+const PasswordInput = styled.input`
+  width: 100%;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  margin-bottom: 15px;
+`;
+
+const SubmitButton = styled.button`
+  padding: 8px 15px;
+  border: none;
+  background-color: #4b6a87; // Using a color from your top bar for consistency
+  color: white;
+  border-radius: 5px;
+  cursor: pointer;
+  &:hover {
+    background-color: #38505c; // A slightly darker shade for hover
+  }
 `;
 
 const TableGroup = styled.div`
@@ -323,8 +347,13 @@ const Page = () => {
       {showModal && (
         <Modal>
           <h3>Enter Password</h3>
-          <input type="password" id="password" />
-          <button onClick={() => handlePasswordSubmit(document.getElementById('password').value)}>Submit</button>
+          <form onSubmit={(e) => {
+            e.preventDefault();
+            handlePasswordSubmit(e.target.password.value);
+          }}>
+            <PasswordInput type="password" id="password" name="password" />
+            <SubmitButton type="submit">Submit</SubmitButton>
+          </form>
         </Modal>
       )}
     </PageWrapper>
