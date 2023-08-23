@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 
 const PageWrapper = styled.div`
@@ -209,6 +209,57 @@ const Page = () => {
   const defaultNames = Array.from({ length: 10 }, () => Array(7).fill(''));
   const [buttonNames, setButtonNames] = useState(defaultNames);
 
+  const [seats, setSeats] = useState([]);
+  const [editorMode, setEditorMode] = useState(false);
+
+  useEffect(() => {
+    fetch("/seats")
+      .then(res => res.json())
+      .then(data => {
+        // Update your state with fetched seats
+        setSeats(data);
+        
+        // Transform the data to match your buttonNames format
+        const namesFromData = data.map(seat => seat.names);
+        setButtonNames(namesFromData);
+      });
+  }, []);
+
+  const updateSeat = (seatId, updatedData) => {
+    fetch(`/seat/${seatId}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(updatedData),
+    })
+    .then(res => res.json())
+    .then(data => {
+      // Update your state with the updated seat
+      setSeats(prevSeats => prevSeats.map(seat => seat._id === data._id ? data : seat));
+    });
+  };
+  
+  const checkPassword = (inputPassword) => {
+    fetch('/check-password', {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ password: inputPassword }),
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.valid) {
+        // Switch to editor mode
+        setEditorMode(true);
+      } else {
+        // Show error or prompt user again
+        alert("Incorrect password");
+      }
+    });
+  };
+
   const handleModeChange = (newMode) => {
     if (newMode === 'editor') {
       setShowModal(true);
@@ -234,6 +285,7 @@ const Page = () => {
       setSelectedVerticalTables(prev => [...prev, index]);
     }
   };
+
 
   return (
     <PageWrapper>
@@ -272,6 +324,7 @@ const Page = () => {
                         const updatedNames = [...buttonNames];
                         updatedNames[selectedTable][i] = ''; // Clear the name for the selected table's square
                         setButtonNames(updatedNames);
+                        updateSeat(selectedTable, { names: updatedNames[selectedTable] });
                       }
                     } else {
                       const newName = prompt('Enter name:');
@@ -279,6 +332,7 @@ const Page = () => {
                         const updatedNames = [...buttonNames];
                         updatedNames[selectedTable][i] = newName;
                         setButtonNames(updatedNames);
+                        updateSeat(selectedTable, { names: updatedNames[selectedTable] });
                       }
                     }
                   }}
